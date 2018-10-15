@@ -1,13 +1,11 @@
 'use strict';
 require('dotenv').config();
 const fastify = require('fastify')({ logger: true });
-fastify.register(require('fastify-formbody'))
+fastify.register(require('fastify-formbody'));
 const { RTMClient } = require('@slack/client');
-const glados = require('./glados/adapter')
+const glados = require('./glados/adapter');
 
-const token = process.env.SLACK_BOT_TOKEN;
-
-const rtm = new RTMClient(token);
+const rtm = new RTMClient(process.env.SLACK_BOT_TOKEN);
 rtm.start();
 
 rtm.on('message', async (event) => {
@@ -21,7 +19,6 @@ rtm.on('message', async (event) => {
 
     rtm.sendMessage(response, event.channel)
         .then((res) => {
-            // `res` contains information about the posted message
             console.log('Message sent: ', res.ts);
         })
         .catch(console.error);
@@ -44,13 +41,7 @@ fastify.post('/select-agent', async (request, reply) => {
     let agentName = await glados.selectAgent(uuid, request.body.text);
     return {
         'text': `You selected the following agent:`,
-        'attachments':
-            [
-                {
-                    'text': agentName,
-                    'color': '#7CD197'
-                }
-            ]
+        'attachments': [{ 'text': agentName, 'color': '#7CD197' }]
     };
 });
 

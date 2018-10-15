@@ -12,7 +12,7 @@ exports.sendMessage = async function (uuid, message) {
     }
 
     // TODO: handle request errors
-    let response = await axios.post(`${process.env.GLADOS_BOT_URL}/conversation/say`, { 'token' : conversationToken, 'message' : message });
+    let response = await axios.post(`${process.env.GLADOS_BOT_URL}/conversation/say`, { 'token': conversationToken, 'message': message });
     // TODO: handle response errors
     return response.data.reply;
 }
@@ -35,7 +35,7 @@ exports.selectAgent = async (uuid, name) => {
     }
 
     // TODO: handle request errors
-    let response = await axios.post(`${process.env.GLADOS_BOT_URL}/agent/select`, { 'token' : conversationToken, 'name' : name });
+    let response = await axios.post(`${process.env.GLADOS_BOT_URL}/agent/select`, { 'token': conversationToken, 'name': name });
     // TODO: handle response errors
     return response.data.agent;
 }
