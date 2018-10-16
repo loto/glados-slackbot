@@ -15,6 +15,7 @@ rtm.on('message', async (event) => {
     }
 
     let uuid = `${event.team}-${event.channel}-${event.user}`;
+    // TODO: catch errors and return something
     let response = await glados.sendMessage(uuid, event.text);
 
     rtm.sendMessage(response, event.channel)
@@ -26,6 +27,8 @@ rtm.on('message', async (event) => {
 
 fastify.post('/list-agents', async (request, reply) => {
     reply.type('application/json').code(200);
+    // TODO: reply immediately and use callback URL
+    // TODO: catch errors and return something
     let agents = await glados.listAgents();
     return {
         'text': `Available agents:`,
@@ -38,6 +41,8 @@ fastify.post('/list-agents', async (request, reply) => {
 fastify.post('/select-agent', async (request, reply) => {
     reply.type('application/json').code(200);
     let uuid = `${request.body.team_id}-${request.body.channel_id}-${request.body.user_id}`;
+    // TODO: reply immediately and use callback URL
+    // TODO: catch errors and return something
     let agentName = await glados.selectAgent(uuid, request.body.text);
     return {
         'text': `You selected the following agent:`,
