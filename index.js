@@ -15,9 +15,10 @@ rtm.on('message', async (event) => {
         return;
     }
 
-    let uuid = `${event.team}-${event.channel}-${event.user}`;
     let response;
     try {
+        await rtm.sendTyping(event.channel);
+        let uuid = `${event.team}-${event.channel}-${event.user}`;
         response = await glados.sendMessage(uuid, event.text);
     } catch (error) {
         response = `I'm sorry but an error occurred:\n> ${error.code}\n> ${error.message}`;
