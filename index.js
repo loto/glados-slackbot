@@ -1,5 +1,6 @@
 'use strict';
 require('dotenv').config();
+const baseLogger = require('pino')();
 const fastify = require('fastify')({ logger: true });
 fastify.register(require('fastify-formbody'));
 const { RTMClient } = require('@slack/client');
@@ -15,17 +16,21 @@ rtm.on('message', async (event) => {
     }
 
     let uuid = `${event.team}-${event.channel}-${event.user}`;
-    // TODO: catch errors and return something
-    let response = await glados.sendMessage(uuid, event.text);
+    let response;
+    try {
+        response = await glados.sendMessage(uuid, event.text);
+    } catch (error) {
+        response = `I'm sorry but an error occurred:\n> ${error.code}\n> ${error.message}`;
+    }
 
     rtm.sendMessage(response, event.channel)
         .then((res) => {
-            console.log('Message sent: ', res.ts);
+            baseLogger.info('Message sent: ', res.ts);
         })
-        .catch(console.error);
+        .catch(baseLogger.error);
 });
 
-fastify.post('/list-agents', async (request, reply) => {
+fastify.post('/list-agents', async (_request, reply) => {
     reply.type('application/json').code(200);
     // TODO: reply immediately and use callback URL
     // TODO: catch errors and return something
@@ -50,7 +55,6 @@ fastify.post('/select-agent', async (request, reply) => {
     };
 });
 
-fastify.listen(process.env.PORT, (err, address) => {
-    if (err) throw err
-    fastify.log.info(`server listening on ${address}`)
+fastify.listen(process.env.PORT, (err, _address) => {
+    if (err) throw err;
 });
