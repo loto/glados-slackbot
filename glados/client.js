@@ -22,7 +22,7 @@ axios.interceptors.response.use(function (response) {
     throw error;
 });
 
-exports.conversationStart = async (uuid, remainingAttempts = 3) => {
+async function conversationStart(uuid, remainingAttempts = 3) {
     let response;
     try {
         response = await axios.post(`${process.env.GLADOS_BOT_URL}/conversation/start`, {}, { timeout: 2000 });
@@ -35,7 +35,7 @@ exports.conversationStart = async (uuid, remainingAttempts = 3) => {
     return response.data.token;
 }
 
-exports.conversationSay = async (token, message, remainingAttempts = 3) => {
+async function conversationSay(token, message, remainingAttempts = 3) {
     let response;
     try {
         response = await axios.post(`${process.env.GLADOS_BOT_URL}/conversation/say`, { 'token': token, 'message': message }, { timeout: 2000 });
@@ -48,7 +48,7 @@ exports.conversationSay = async (token, message, remainingAttempts = 3) => {
     return response.data.reply;
 }
 
-exports.agentsList = async (remainingAttempts = 3) => {
+async function agentsList(remainingAttempts = 3) {
     let response;
     try {
         response = await axios.get(`${process.env.GLADOS_BOT_URL}/agents/list`, { timeout: 2000 });
@@ -61,7 +61,7 @@ exports.agentsList = async (remainingAttempts = 3) => {
     return response.data.agents;
 }
 
-exports.agentSelect = async (token, name, remainingAttempts = 3) => {
+async function agentSelect(token, name, remainingAttempts = 3) {
     let response;
     try {
         response = await axios.post(`${process.env.GLADOS_BOT_URL}/agent/select`, { 'token': token, 'name': name }, { timeout: 2000 });
@@ -72,4 +72,11 @@ exports.agentSelect = async (token, name, remainingAttempts = 3) => {
     }
 
     return response.data.agent;
+}
+
+module.exports = {
+    conversationStart,
+    conversationSay,
+    agentsList,
+    agentSelect
 }
