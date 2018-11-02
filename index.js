@@ -4,7 +4,7 @@ const baseLogger = require('pino')();
 const fastify = require('fastify')({ logger: true });
 fastify.register(require('fastify-formbody'));
 const { RTMClient } = require('@slack/client');
-const glados = require('./glados/adapter');
+const glados = require('./lib/glados/adapter');
 
 const rtm = new RTMClient(process.env.SLACK_BOT_TOKEN);
 rtm.start();
