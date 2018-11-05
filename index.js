@@ -21,7 +21,7 @@ rtm.on('message', async (event) => {
         let uuid = `${event.team}-${event.channel}-${event.user}`;
         response = await glados.sendMessage(uuid, event.text);
     } catch (error) {
-        response = `I'm sorry but an error occurred:\n> ${error.code}\n> ${error.message}`;
+        response = `I'm sorry but an error occurred:\n> ${error.message}`;
     }
 
     rtm.sendMessage(response, event.channel)
