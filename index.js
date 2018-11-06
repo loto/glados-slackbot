@@ -26,7 +26,12 @@ fastify.post('/slack-event-raised', async (request, reply) => {
         let uuid = `${event.team}-${event.channel}-${event.user}`;
         response['text'] = await glados.sendMessage(uuid, event.text);
     } catch (error) {
-        response['text'] = `I'm sorry but an error occurred:\n> ${error.message}`;
+        response['attachments'] = new Array({ 
+            'title' : `I'm sorry but an error occurred` ,
+            'text' : error.message,
+            'color' : 'danger'
+
+        });
     }
 
     webApiClient.chat.postMessage(response)
