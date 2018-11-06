@@ -3,28 +3,33 @@ require('dotenv').config();
 const baseLogger = require('pino')();
 const fastify = require('fastify')({ logger: true });
 fastify.register(require('fastify-formbody'));
-const { RTMClient } = require('@slack/client');
+const { WebClient } = require('@slack/client');
 const glados = require('./lib/glados/adapter');
+const webApiClient = new WebClient(process.env.SLACK_OAUTH_TOKEN);
 
-const rtm = new RTMClient(process.env.SLACK_BOT_TOKEN);
-rtm.start();
-
-rtm.on('message', async (event) => {
-    if ((event.subtype && event.subtype === 'bot_message') ||
-        (!event.subtype && event.subtype === rtm.activeUserId)) {
+fastify.post('/slack-event-raised', async (request, reply) => {
+    let payload = request.body;
+    // Slack events subscription endpoint verification, https://api.slack.com/events/url_verification
+    if (payload.type === 'url_verification') {
+        reply.type('text/plain').code(200).send(payload.challenge);
         return;
     }
 
-    let response;
+    let event = payload.event;
+    // Always respond under 3s or slack will consider the call as failed and will retry
+    // https://api.slack.com/events-api, see 'Responding to Events' section
+    reply.type('text/plain').code(204).send();
+    if (event.subtype === 'bot_message') return;
+
+    let response = { channel: event.channel };
     try {
-        await rtm.sendTyping(event.channel);
         let uuid = `${event.team}-${event.channel}-${event.user}`;
-        response = await glados.sendMessage(uuid, event.text);
+        response['text'] = await glados.sendMessage(uuid, event.text);
     } catch (error) {
-        response = `I'm sorry but an error occurred:\n> ${error.message}`;
+        response['text'] = `I'm sorry but an error occurred:\n> ${error.message}`;
     }
 
-    rtm.sendMessage(response, event.channel)
+    webApiClient.chat.postMessage(response)
         .then((res) => {
             baseLogger.info('Message sent: ', res.ts);
         })
