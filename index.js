@@ -5,6 +5,7 @@ const fastify = require('fastify')({ logger: true });
 fastify.register(require('fastify-formbody'));
 const { WebClient } = require('@slack/client');
 const glados = require('./lib/glados/adapter');
+const formatter = require('./lib/glados/formatter');
 const webApiClient = new WebClient(process.env.SLACK_OAUTH_TOKEN);
 
 fastify.post('/slack-event-raised', async (request, reply) => {
@@ -16,22 +17,18 @@ fastify.post('/slack-event-raised', async (request, reply) => {
     }
 
     let event = payload.event;
-    // Always respond under 3s or slack will consider the call as failed and will retry
+    // Always respond under 3s or slack will consider the call failed and follow its retry policy
     // https://api.slack.com/events-api, see 'Responding to Events' section
     reply.type('text/plain').code(204).send();
     if (event.subtype === 'bot_message') return;
 
-    let response = { channel: event.channel };
+    let response;
     try {
-        let uuid = `${event.team}-${event.channel}-${event.user}`;
-        response['text'] = await glados.sendMessage(uuid, event.text);
+        let uuid = `${event.channel}-${event.user}`;
+        let message = await glados.sendMessage(uuid, event.text);
+        response = await formatter.formatResponse(event.channel, message);
     } catch (error) {
-        response['attachments'] = new Array({ 
-            'title' : `I'm sorry but an error occurred` ,
-            'text' : error.message,
-            'color' : 'danger'
-
-        });
+        response = await formatter.formatError(event.channel, error);
     }
 
     webApiClient.chat.postMessage(response)
@@ -56,7 +53,7 @@ fastify.post('/list-agents', async (_request, reply) => {
 
 fastify.post('/select-agent', async (request, reply) => {
     reply.type('application/json').code(200);
-    let uuid = `${request.body.team_id}-${request.body.channel_id}-${request.body.user_id}`;
+    let uuid = `${request.body.channel_id}-${request.body.user_id}`;
     // TODO: reply immediately and use callback URL
     // TODO: catch errors and return something
     let agentName = await glados.selectAgent(uuid, request.body.text);
