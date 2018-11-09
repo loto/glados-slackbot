@@ -1,7 +1,7 @@
 'use strict';
 require('dotenv').config();
-const baseLogger = require('pino')();
-const fastify = require('fastify')({ logger: true });
+const baseLogger = require('pino')({ level: process.env.LOG_LEVEL });
+const fastify = require('fastify')({ logger: { level: process.env.LOG_LEVEL } });
 fastify.register(require('fastify-formbody'));
 const { WebClient } = require('@slack/client');
 const glados = require('./lib/glados/adapter');
