@@ -4,7 +4,8 @@
   "description": "glados test bot",
   "main": "index.js",
   "scripts": {
-    "start": "node index.js"
+    "start": "node index.js",
+    "test": "nyc --all mocha --recursive --timeout=3000"
   },
   "author": "Lionel Oto",
   "license": "ISC",
@@ -19,5 +20,9 @@
     "fastify": "^1.12.1",
     "fastify-formbody": "^2.0.1",
     "uuid": "^3.3.2"
+  },
+  "devDependencies": {
+    "mocha": "^5.2.0",
+    "nyc": "^13.1.0"
   }
 }
