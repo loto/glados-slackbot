@@ -6,7 +6,7 @@ fastify.register(require('fastify-formbody'));
 const { WebClient } = require('@slack/client');
 const glados = require('./lib/glados/adapter');
 const formatter = require('./lib/glados/formatter');
-const webApiClient = new WebClient(process.env.SLACK_OAUTH_TOKEN);
+const webApiClient = new WebClient(process.env.SLACK_BOT_TOKEN);
 
 fastify.post('/slack-event-raised', async (request, reply) => {
     let payload = request.body;
@@ -26,16 +26,18 @@ fastify.post('/slack-event-raised', async (request, reply) => {
     try {
         let uuid = `${event.channel}-${event.user}`;
         let message = await glados.sendMessage(uuid, event.text);
-        response = await formatter.formatResponse(event.channel, message);
+        response = await formatter.formatResponse(event, message);
     } catch (error) {
-        response = await formatter.formatError(event.channel, error);
+        response = await formatter.formatError(event, error);
     }
 
     webApiClient.chat.postMessage(response)
         .then((res) => {
             baseLogger.info('Message sent: ', res.ts);
         })
-        .catch(baseLogger.error);
+        .catch((error) => {
+            baseLogger.error(error.message);
+        });
 });
 
 fastify.post('/list-agents', async (_request, reply) => {
