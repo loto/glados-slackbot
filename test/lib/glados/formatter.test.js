@@ -1,5 +1,5 @@
 const assert = require('assert');
-const subject = require('./../../../lib/glados/formatter');
+const subject = require('../../../lib/glados/formatter');
 
 describe('glados', () => {
     describe('formatter', () => {
